@@ -36,7 +36,7 @@ jobs:
           slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: 'deploy-notifications'
           text: |
-            🚀 Deployment for ${{ github.repository }} (${{ github.ref_name }}) ${{ job.status }}!
+            Deployment for ${{ github.repository }} (${{ github.ref_name }}) ${{ job.status }}!
             Commit: ${{ github.sha }}
             Environment: ${{ inputs.environment }}
             Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
