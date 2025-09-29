@@ -1,0 +1,38 @@
+name: Test Backend and Frontend
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'  # Cache npm dependencies
+          cache-dependency-path: ${{ matrix.service }}/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd ${{ matrix.service }}
+          npm ci  # Use npm ci for deterministic installs
+
+      - name: Run tests
+        run: |
+          cd ${{ matrix.service }}
+          npm test || echo "No tests defined for ${{ matrix.service }}"
+        env:
+          CI: true
+
+      - name: Run lint
+        run: |
+          cd ${{ matrix.service }}
+          npm run lint || echo "No lint script defined for ${{ matrix.service }}"

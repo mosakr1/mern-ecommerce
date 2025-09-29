@@ -1,0 +1,42 @@
+name: Deploy to Railway
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Deployment environment (production or develop)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5.0.0
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          railway up --service ${{ matrix.service }} --environment ${{ inputs.environment }}
+        working-directory: ./${{ matrix.service }}
+
+      - name: Notify Slack on success/failure
+        if: always()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: 'deploy-notifications'
+          text: |
+            🚀 Deployment for ${{ github.repository }} (${{ github.ref_name }}) ${{ job.status }}!
+            Commit: ${{ github.sha }}
+            Environment: ${{ inputs.environment }}
+            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

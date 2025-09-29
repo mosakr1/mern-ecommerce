@@ -1,0 +1,35 @@
+name: MERN E-commerce CI/CD
+
+# Triggers: Run on push/pull_request to main or develop branches
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+# Environment variables available to all jobs
+env:
+  NODE_VERSION: '18'  # Match Node version in Dockerfile
+  DOCKER_REGISTRY: ghcr.io  # Use GitHub Container Registry
+  IMAGE_PREFIX: ${{ github.repository_owner }}/mern-ecommerce
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    # secrets: inherit
+
+  build:
+    needs: test
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+
+  deploy:
+    needs: build
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'develop' }}
