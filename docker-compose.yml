@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "2000:80"
+    environment:
+      - MONGO_URI=mongodb+srv://mern-ecommerce:QhL80AfM1aEly1b9@cluster0.f7r9sx1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+    depends_on:
+      - backend
